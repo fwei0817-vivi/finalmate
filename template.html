@@ -4,8 +4,82 @@
   <meta charset="UTF-8">
   <title>{{TITLE}}</title>
   <style>
-    /* CSS added in Tasks 2 + 9 + 10 */
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 860px; margin: 2em auto; padding: 0 1em; line-height: 1.6; color: #222; }
+:root {
+  --hl-yellow: #fff59d;
+  --hl-pink: #f8bbd0;
+  --hl-blue: #b3e5fc;
+  --hl-green: #c8e6c9;
+}
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; max-width: 860px; margin: 0 auto; padding: 4em 1em 4em; line-height: 1.65; color: #222; }
+h1 { border-bottom: 2px solid #333; padding-bottom: 0.3em; margin-top: 0; }
+h2 { color: #b91c1c; margin-top: 2.2em; border-bottom: 1px dashed #ddd; padding-bottom: 0.2em; }
+h3 { color: #1e3a8a; margin-top: 1.6em; }
+blockquote { border-left: 4px solid #888; padding: 0.5em 1em; background: #f8f8f8; color: #333; margin: 1em 0; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ccc; padding: 0.4em 0.8em; text-align: left; }
+th { background: #f1f5f9; }
+code { background: #f1f1f1; padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+pre { background: #f6f8fa; padding: 1em; border-radius: 6px; overflow-x: auto; }
+pre code { background: transparent; padding: 0; }
+
+/* Highlight palette */
+mark { padding: 0 0.15em; border-radius: 2px; cursor: pointer; }
+mark.hl-yellow { background: var(--hl-yellow); }
+mark.hl-pink { background: var(--hl-pink); }
+mark.hl-blue { background: var(--hl-blue); }
+mark.hl-green { background: var(--hl-green); }
+mark:not([class]) { background: var(--hl-yellow); }  /* default for ==term== */
+
+/* Dashboard */
+#dashboard { position: fixed; top: 0; left: 0; right: 0; background: #fffbe6; border-bottom: 2px solid #f0c244; padding: 0.6em 1em; display: flex; gap: 0.8em; align-items: center; flex-wrap: wrap; z-index: 10; font-size: 0.92em; }
+#dashboard strong { font-size: 1em; }
+#dashboard .stat { padding: 0.15em 0.6em; background: white; border-radius: 4px; border: 1px solid #ddd; }
+#dashboard button { padding: 0.25em 0.7em; cursor: pointer; border: 1px solid #888; background: white; border-radius: 3px; font-size: 0.92em; }
+#dashboard button:hover { background: #fff; border-color: #444; }
+
+/* Highlight toolbar (floating) */
+#hl-toolbar { position: absolute; background: white; border: 1px solid #aaa; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.18); padding: 0.3em; display: flex; gap: 0.3em; z-index: 100; }
+#hl-toolbar button { width: 1.6em; height: 1.6em; border: 1px solid #888; border-radius: 3px; cursor: pointer; padding: 0; }
+#hl-toolbar .swatch-yellow { background: var(--hl-yellow); }
+#hl-toolbar .swatch-pink { background: var(--hl-pink); }
+#hl-toolbar .swatch-blue { background: var(--hl-blue); }
+#hl-toolbar .swatch-green { background: var(--hl-green); }
+
+/* Quiz card */
+.quiz-card { border: 1px solid #ccc; border-radius: 8px; padding: 1em 1.2em; margin: 1.4em 0; background: #fafafa; }
+.quiz-card .q { font-weight: 600; margin-bottom: 0.7em; }
+.quiz-card .options { display: flex; flex-direction: column; gap: 0.45em; }
+.quiz-card .opt { display: flex; align-items: flex-start; gap: 0.6em; padding: 0.5em 0.8em; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; background: white; line-height: 1.45; }
+.quiz-card .opt input { margin-top: 0.25em; }
+.quiz-card .opt:hover { background: #f0f7ff; }
+.quiz-card .opt.selected { border-color: #4f46e5; background: #eef2ff; }
+.quiz-card.answered .opt { cursor: default; }
+.quiz-card.answered .opt:hover { background: white; }
+.quiz-card.answered .opt.selected:hover { background: #eef2ff; }
+.quiz-card.answered .opt.correct { background: #dcfce7; border-color: #16a34a; }
+.quiz-card.answered .opt.wrong { background: #fee2e2; border-color: #dc2626; }
+.quiz-card .actions { margin-top: 0.9em; display: flex; gap: 0.5em; }
+.quiz-card .actions button { padding: 0.3em 0.9em; cursor: pointer; border: 1px solid #888; background: white; border-radius: 4px; }
+.quiz-card .explain { display: none; margin-top: 0.9em; padding: 0.65em 0.9em; background: #ecfdf5; border-left: 3px solid #16a34a; font-size: 0.95em; line-height: 1.55; }
+.quiz-card.answered .explain { display: block; }
+
+/* Cheatsheet section */
+.cheatsheet { background: #fffbe6; border: 1px dashed #f0c244; padding: 1em 1.2em; border-radius: 8px; margin: 1.5em 0; }
+body.cheatsheet-only main > :not(.cheatsheet) { display: none; }
+
+/* Mermaid */
+.mermaid { background: white; padding: 0.5em; border-radius: 6px; }
+
+/* Print rules */
+@media print {
+  body { padding: 0.5em; max-width: none; font-size: 9pt; line-height: 1.4; }
+  #dashboard, #hl-toolbar { display: none; }
+  .quiz-card { display: none; }
+  mark { background: transparent !important; border-bottom: 1px solid #888; }
+  h1, h2, h3 { page-break-after: avoid; }
+  pre, blockquote { page-break-inside: avoid; }
+}
   </style>
 </head>
 <body>
