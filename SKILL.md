@@ -123,6 +123,32 @@ Rules:
 | `🔥/🔥🔥/🔥🔥🔥` after `##`  | text                                | text                                   | Section-level importance                       |
 | `<!-- cheatsheet:start/end --> | invisible HTML comment              | data anchor for toggle + aggregator    | Mark cheatsheet section                        |
 
+### Renderer pitfalls (CRITICAL — learned from failures)
+
+These are renderer bugs that silently break the file. They look fine in source but render wrong. Learn them once, never re-introduce:
+
+1. **NEVER put `=` inside `==term==`** — Obsidian's highlight parser breaks when the inner content contains `=`. The whole `==Project = a temporary endeavor==` will render with literal `==` markers visible (highlight applies but markers don't get stripped).
+   - ❌ `==EV = % complete × BAC==`
+   - ❌ `==PM = application of knowledge, skills...==`
+   - ✅ `==EV== = % complete × BAC` (highlight only the term)
+   - ✅ `PM is the ==application of knowledge, skills, tools, techniques== to ==meet project requirements==` (highlight phrase tokens, not equation)
+
+2. **NEVER write `$$` literally** — Obsidian interprets `$$` as opening MathJax math mode. A single stray `$$` opens math mode and turns ALL following text (until next `$$`) into italic monospace math font. The cheatsheet, tables, everything below silently corrupts.
+   - ❌ `Fast + Good = $$` (slang for "expensive")
+   - ✅ `Fast + Good = 贵（High Cost）` or `Fast + Good = expensive`
+   - Single `$` is also risky for inline math (`$...$`); avoid currency in MD or escape with `\$`.
+
+3. **NEVER use mermaid `flowchart` to draw triangles** — flowchart auto-layout stacks nodes vertically. A 3-node `Q --- T --- B --- Q` cycle renders as a vertical line with curved arrows, not a triangle.
+   - ❌ ` ```mermaid flowchart TB ... Q --- T --- B --- Q ``` `
+   - ✅ ASCII art with `▲ / \ ─` characters inside a fenced code block (no language tag) for triangles, hierarchies, or any fixed-shape diagram
+   - mermaid is fine for: linear flowcharts (LR/TB stages), sequence diagrams, gantt, timeline, classDiagram. Bad for: triangles, fixed geometric shapes, anything where layout matters more than connectivity.
+
+4. **Single backtick around HTML-comment markers in tables breaks table parsing** — `\| \`<!-- foo -->\` \|` may render fine but inline `<!--` next to table pipes can confuse Obsidian's table parser. Put HTML comments on their own line outside tables.
+
+5. **Avoid `*` standalone in text** — bare `*` (e.g. as a multiplication sign) can trigger italics. Use `×` (Unicode U+00D7) or `\*` for multiplication.
+
+When in doubt, paste the rendered output back and visually verify. Don't ship without preview.
+
 ### Section importance rating (mandatory on every `##` section)
 
 Append a 🔥 rating to every `##` section title to signal exam priority:
