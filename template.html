@@ -176,6 +176,75 @@ function initMermaid() {
   }
 }
 initMermaid();
+
+function markAnswered(card, selected, correct) {
+  card.classList.add('answered');
+  card.querySelectorAll('.opt').forEach(o => {
+    const v = o.querySelector('input').value;
+    o.classList.remove('correct', 'wrong');
+    if (v === correct) o.classList.add('correct');
+    if (v === selected && v !== correct) o.classList.add('wrong');
+  });
+  card.querySelector('.retry').hidden = false;
+  card.querySelectorAll('input').forEach(i => i.disabled = true);
+}
+
+function initQuiz() {
+  const state = store.get('quiz') || {};
+  document.querySelectorAll('.quiz-card').forEach(card => {
+    const id = card.dataset.id;
+    const correct = card.dataset.correct;
+    const cardState = state[id] || { selected: null, firstCorrect: null, attempts: 0 };
+
+    // Restore: only first-attempt result is persistent. Body answered-state is reapplied.
+    if (cardState.firstCorrect !== null && cardState.selected) {
+      const input = card.querySelector(`input[value="${cardState.selected}"]`);
+      if (input) input.checked = true;
+      markAnswered(card, cardState.selected, correct);
+    }
+
+    card.querySelectorAll('input').forEach(i => i.addEventListener('change', () => {
+      card.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+      i.closest('.opt').classList.add('selected');
+    }));
+
+    card.querySelector('.submit').addEventListener('click', () => {
+      const sel = card.querySelector('input:checked');
+      if (!sel) { alert('Please pick an answer first.'); return; }
+      const v = sel.value;
+      const isCorrect = (v === correct);
+      cardState.selected = v;
+      cardState.attempts++;
+      if (cardState.firstCorrect === null) cardState.firstCorrect = isCorrect;
+      state[id] = cardState;
+      store.set('quiz', state);
+      markAnswered(card, v, correct);
+      updateDashboard();
+    });
+
+    card.querySelector('.show-answer').addEventListener('click', () => {
+      if (cardState.firstCorrect === null) {
+        cardState.firstCorrect = false;
+        cardState.attempts = Math.max(cardState.attempts, 1);
+      }
+      cardState.selected = cardState.selected || correct;
+      state[id] = cardState;
+      store.set('quiz', state);
+      markAnswered(card, cardState.selected, correct);
+      updateDashboard();
+    });
+
+    card.querySelector('.retry').addEventListener('click', () => {
+      card.classList.remove('answered');
+      card.querySelectorAll('input').forEach(i => { i.checked = false; i.disabled = false; });
+      card.querySelectorAll('.opt').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+      card.querySelector('.retry').hidden = true;
+    });
+  });
+}
+initQuiz();
+
+function updateDashboard() { /* placeholder, real impl in Task 8 */ }
   </script>
 </body>
 </html>
