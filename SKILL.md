@@ -84,6 +84,30 @@ A one-line comparison table is just an **index** — for any protocol / algorith
 
 Attack ↔ defense should be **paired**: explaining the attack mechanism without showing how the defense plugs into the same step is incomplete.
 
+## Heading structure (REQUIRED, 2 levels)
+
+Every class file uses exactly two content levels of heading; do not nest deeper.
+
+```markdown
+# Class N: <Topic>                       ← H1, file scope, one per file
+
+## 1. Knowledge Module 🔥🔥🔥           ← H2, big topic, MUST carry 🔥 rating
+### 1.1 Sub-concept                     ← H3, specific concept, MUST carry ⭐ takeaway + ≥1 quiz
+### 1.2 Sub-concept
+
+## 2. Knowledge Module 🔥🔥
+### 2.1 Sub-concept
+```
+
+Rules:
+- File starts with one `#` line: `# Class N: <Topic>`
+- Every **content** `##` carries a 🔥 rating (mandatory) and is a knowledge module
+- Every **content** `###` carries 1 ⭐ takeaway, ≥1 quiz (when exam format includes MC/混合), ≥1 slide quote when slide bullet exists
+- Do NOT use `####` or deeper. If a sub-concept needs further nesting, flatten it inline or split it into a new `##`.
+- **Meta-section exemptions:**
+  - The cheatsheet section (`## 📋 Cheatsheet`) does NOT need 🔥 and contains its own structure — see "Cheatsheet rules"
+  - Solutions-mode subsections (`### Question`, `### Approach`, `### Step-by-step`, `### Final answer`) do NOT need quizzes — see "Solutions mode"
+
 ## Visual formatting (Obsidian)
 
 | Marker | Use case |
