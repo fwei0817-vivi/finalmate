@@ -108,16 +108,20 @@ Rules:
   - The cheatsheet section (`## 📋 Cheatsheet`) does NOT need 🔥 and contains its own structure — see "Cheatsheet rules"
   - Solutions-mode subsections (`### Question`, `### Approach`, `### Step-by-step`, `### Final answer`) do NOT need quizzes — see "Solutions mode"
 
-## Visual formatting (Obsidian)
+## Visual formatting (cross-mode)
 
-| Marker | Use case |
-|---|---|
-| `⭐` at line start | Exam-level core takeaway (one per section, max 2) |
-| `==term==` | Must-remember key terminology |
-| `**bold**` | In-paragraph emphasis |
-| `<span style="color:gray">…</span>` | Supplementary explanation, design rationale, nuance |
-| `> quote block` | **Preserve slide original English** — matches exam option wording |
-| `🔥🔥🔥` / `🔥🔥` / `🔥` after section title | Section-level importance (see below) |
+| MD source                     | Mode A render (Obsidian)            | Mode B render (HTML/marked)            | Use case                                       |
+|-------------------------------|-------------------------------------|----------------------------------------|------------------------------------------------|
+| `⭐` at line start            | text + visual                       | text + visual                          | Exam-level core takeaway (1 per `###`, max 2) |
+| `==term==`                    | yellow highlight (Obsidian native)  | `<mark>` (yellow via CSS)              | Must-remember terminology                      |
+| `**bold**`                    | bold                                | bold                                   | In-paragraph emphasis                          |
+| `<span style="color:gray">…</span>` | gray text                       | gray text (CSS)                        | Supplementary explanation, design rationale    |
+| `> blockquote`                | block quote                         | `<blockquote>` styled                  | Slide original English (matches exam options)  |
+| `> [!question]` callout       | callout (mode A only)               | not used                               | Quiz (mode A)                                  |
+| ` ```quiz ` fence             | inert code block (mode A unused)    | rendered as quiz card                  | Quiz (mode B)                                  |
+| ` ```mermaid ` fence          | rendered diagram                    | rendered via mermaid.js                | Diagrams                                       |
+| `🔥/🔥🔥/🔥🔥🔥` after `##`  | text                                | text                                   | Section-level importance                       |
+| `<!-- cheatsheet:start/end --> | invisible HTML comment              | data anchor for toggle + aggregator    | Mark cheatsheet section                        |
 
 ### Section importance rating (mandatory on every `##` section)
 
