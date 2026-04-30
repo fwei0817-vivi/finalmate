@@ -333,6 +333,42 @@ Example:
 
 The intro is **NOT** a replacement for §3 mechanism — it's a 30-second orientation so the reader knows why they should care before reading 200 lines of detail.
 
+## Cheatsheet rules
+
+Applies only when Q3.cheatsheet.enabled = true. If false, skip this entire section, do not include cheatsheet markers in any class file, and do not produce `cheatsheet.<ext>`.
+
+### Per-class cheatsheet section (last `##` of every class file)
+
+```markdown
+<!-- cheatsheet:start -->
+## 📋 Cheatsheet (Class N)
+- ⭐ Key formula 1
+- ⭐ Key formula 2
+| Term | Meaning |
+|---|---|
+| ... | ... |
+```mermaid
+flowchart LR
+  ...
+```
+<!-- cheatsheet:end -->
+```
+
+Constraints:
+- **No hard per-class line limit.** Length is driven by 🔥 ratings — write what's worth carrying into the exam, not what fills a quota.
+- Priority: 🔥🔥🔥 → must include; 🔥🔥 → include if relevant to exam; 🔥 → exclude unless explicitly important.
+- Allowed content: ⭐ takeaways, formulas, key term tables, Mermaid relation diagrams.
+- Forbidden content: slide quotes (already in main notes), quizzes, prose explanations, examples, code listings.
+- Print-friendly: monochrome readable (don't rely on color), avoid wide tables that overflow page width.
+
+### Aggregated cheatsheet file
+
+After all class notes are written, produce `cheatsheet.<ext>` whose content is the concatenation of every per-class cheatsheet section, in class order. In mode B, use the same `template.html` shell — highlight tool still works on the aggregate.
+
+### Page-budget check (mode B only, when Q3.cheatsheet.pages > 0)
+
+After producing `cheatsheet.html`, run a rough page estimate (~50 lines per printed page at default settings). If the estimate exceeds Q3.cheatsheet.pages, surface a "trim suggestions" list to the user, ordered low-priority-first (🔥 then 🔥🔥), and ask the user which sections to remove. **Never auto-trim** — the user decides.
+
 ## When NOT to use this skill
 
 - User asks for a quick summary, not exam-level notes
