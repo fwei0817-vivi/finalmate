@@ -101,6 +101,12 @@ const store = {
   clear() { Object.keys(localStorage).filter(k => k.startsWith(NS)).forEach(k => localStorage.removeItem(k)); }
 };
 
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+  return h.toString(36);
+}
+
 function escapeHtml(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function wrapCheatsheet(html) {
@@ -163,6 +169,11 @@ const quizExt = {
 marked.use({ extensions: [quizExt] });
 
 renderAll();
+const sourceHash = hashStr(document.getElementById('content').textContent);
+const savedHl = store.get('highlights');
+if (savedHl && savedHl.hash === sourceHash) {
+  document.getElementById('rendered').innerHTML = savedHl.html;
+}
 function initMermaid() {
   document.querySelectorAll('pre code.language-mermaid').forEach(code => {
     const div = document.createElement('div');
@@ -245,6 +256,91 @@ function initQuiz() {
 initQuiz();
 
 function updateDashboard() { /* placeholder, real impl in Task 8 */ }
+
+function saveHighlights() {
+  store.set('highlights', {
+    hash: sourceHash,
+    html: document.getElementById('rendered').innerHTML,
+  });
+  updateDashboard();
+}
+
+function initHighlight() {
+  const colors = ['yellow', 'pink', 'blue', 'green'];
+  const toolbar = document.getElementById('hl-toolbar');
+  toolbar.innerHTML = colors.map(c =>
+    `<button class="swatch-${c}" data-c="${c}" title="Highlight ${c}"></button>`
+  ).join('') + '<button data-c="remove" title="Remove highlight" style="font-weight:bold;">✕</button>';
+
+  function showToolbar(rect) {
+    toolbar.style.left = `${window.scrollX + rect.left + rect.width / 2 - 80}px`;
+    toolbar.style.top = `${window.scrollY + rect.top - 38}px`;
+    toolbar.hidden = false;
+  }
+  function hideToolbar() { toolbar.hidden = true; }
+
+  document.addEventListener('mouseup', e => {
+    if (toolbar.contains(e.target)) return;
+    const sel = window.getSelection();
+    if (sel.isCollapsed || !sel.toString().trim()) { hideToolbar(); return; }
+    const range = sel.getRangeAt(0);
+    if (!document.getElementById('rendered').contains(range.commonAncestorContainer)) {
+      hideToolbar(); return;
+    }
+    const rect = range.getBoundingClientRect();
+    showToolbar(rect);
+  });
+
+  toolbar.addEventListener('mousedown', e => e.preventDefault()); // keep selection alive when clicking toolbar
+
+  toolbar.addEventListener('click', e => {
+    const btn = e.target.closest('button'); if (!btn) return;
+    const color = btn.dataset.c;
+    const sel = window.getSelection();
+    if (sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+
+    if (color === 'remove') {
+      // Walk selection nodes, unwrap any <mark> intersecting it.
+      const container = range.commonAncestorContainer;
+      const root = container.nodeType === 1 ? container : container.parentElement;
+      root.querySelectorAll('mark').forEach(m => {
+        if (range.intersectsNode(m)) {
+          while (m.firstChild) m.parentNode.insertBefore(m.firstChild, m);
+          m.remove();
+        }
+      });
+    } else {
+      try {
+        const mark = document.createElement('mark');
+        mark.className = `hl-${color}`;
+        range.surroundContents(mark);
+      } catch (err) {
+        // Selection spans multiple block elements — split into chunks.
+        const frag = range.extractContents();
+        const wrapper = document.createElement('mark');
+        wrapper.className = `hl-${color}`;
+        wrapper.appendChild(frag);
+        range.insertNode(wrapper);
+      }
+    }
+
+    sel.removeAllRanges();
+    hideToolbar();
+    saveHighlights();
+  });
+
+  // Double-click an existing <mark> to remove it.
+  document.getElementById('rendered').addEventListener('dblclick', e => {
+    const m = e.target.closest('mark');
+    if (m) {
+      while (m.firstChild) m.parentNode.insertBefore(m.firstChild, m);
+      m.remove();
+      saveHighlights();
+    }
+  });
+}
+initHighlight();
   </script>
 </body>
 </html>
