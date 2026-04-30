@@ -7,6 +7,49 @@ description: Use when writing or rewriting technical lecture notes, study guides
 
 This skill defines writing style and structure for study notes optimized for multiple-choice exam preparation. The user is preparing for technical exams where slide wording = option wording.
 
+## Before writing notes (REQUIRED)
+
+Before producing any content, ask the user the following three questions ONE AT A TIME, then echo a `Config locked: { ... }` summary and wait for a final user nod before writing.
+
+If a `<project>/.notes-config.json` file exists in the working directory, READ it first and skip questions whose values are already set. Print "Using cached config: { ... }" and confirm. If the user says "reconfigure" / "change config" / "重新配置", re-ask all three.
+
+### Q1. Output format
+- A. Obsidian MD only (callouts, `==highlight==`, no JS)
+- B. Interactive HTML only (template.html-rendered, multi-color highlight tool, clickable quiz with localStorage progress, cheatsheet toggle)
+- C. Both (write the MD, then also produce HTML)
+
+### Q2. Course context (one shot, all fields)
+- Course code + name (e.g., `IEOR 4510 - Project Management`)
+- Class numbers in scope (e.g., `[1,2,3,4,5,6,8,9,10]` — gaps allowed)
+- Exam format: MC / 大题 / 混合 / 无考试 (controls whether quizzes are generated; if 无考试 or 大题-only, omit `> [!question]` / ```quiz blocks)
+- Native language for `<span style="color:gray">…</span>` supplementary text (quiz body stays English)
+
+### Q3. Cheatsheet
+- Generate per-class cheatsheet section + aggregated `cheatsheet.html`? (yes / no)
+- If yes: page allowance for the printed cheatsheet (e.g., `4`; `0` = no limit)
+- If no: skip per-class `<!-- cheatsheet:start/end -->` markers entirely; do not produce an aggregated file; suppress the cheatsheet toggle in mode-B dashboards
+
+### After answers
+
+Write the answers to `<project>/.notes-config.json` (overwrite if present), echo:
+
+```
+Config locked: {
+  format: "B",
+  course: "IEOR 4510 - Project Management",
+  classes: [1,2,3,4,5,6,8,9,10],
+  examFormat: "MC",
+  nativeLang: "zh",
+  cheatsheet: { enabled: true, pages: 4 }
+}
+```
+
+Wait for user "go" / "ok" / "确认" before producing notes.
+
+### Shortcut
+
+If the user's first message implies an answer (e.g., "用 HTML 模式整理 class 3"), treat that as Q1=B and skip Q1; still ask Q2 and Q3 (unless cached).
+
 ## Why these rules exist
 
 - User has weak baseline on the material; original notes felt "incoherent"
