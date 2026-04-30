@@ -133,6 +133,65 @@ Format: `## 5. SQL Injection：经典案例 🔥🔥🔥`
 
 The user reads notes with limited time — importance ratings let them prioritize when triaging which sections to deep-read vs scan.
 
+## Output mode rules
+
+The `format` field of the config (Q1) selects the writing mode.
+
+### Mode A — Obsidian MD output
+
+- File extension: `.md`
+- Quiz syntax: Obsidian callout
+  ```
+  > [!question] Quiz
+  > Question stem in **English**.
+  > A. ...
+  > B. ...
+  > C. ...
+  > D. ...
+  >
+  > > [!success]- Answer
+  > > **B**. Brief explanation in English.
+  ```
+- Highlight: `==term==`
+- Gray text: `<span style="color:gray">…</span>`
+- Mermaid: ` ```mermaid ` fenced block
+- Slide quote: `> blockquote`
+- Cheatsheet markers: `<!-- cheatsheet:start --> … <!-- cheatsheet:end -->` (still useful for downstream Obsidian queries; harmless if unused)
+- Reader opens in Obsidian; no JS, no install
+
+### Mode B — Interactive HTML output
+
+- File extension: `.html`
+- Output is a copy of `~/.claude/skills/study-notes-writer/template.html` with two placeholders filled:
+  - `{{TITLE}}` — `Class N: <Topic> — <Course Code>`
+  - `{{MD_CONTENT}}` — the markdown body (verbatim, no HTML escaping needed; sits inside `<script type="text/markdown" id="content">…</script>`)
+- Quiz syntax: ```quiz fenced block (the Obsidian callout is NOT used in mode B)
+  ```
+  ​```quiz
+  Q: Question stem in English.
+  A: Option A
+  B: Option B
+  C: Option C
+  D: Option D
+  correct: A
+  explain: One-paragraph explanation in English. Cover why correct is right and at least one distractor's specific misconception.
+  ```
+- Highlight: `==term==` (preprocessed to `<mark>` in template.html)
+- Gray text: `<span style="color:gray">…</span>` (CSS-styled)
+- Mermaid: ` ```mermaid ` fenced block (post-processed to `<div class="mermaid">` in template.html)
+- Slide quote: `> blockquote`
+- Cheatsheet markers: REQUIRED `<!-- cheatsheet:start --> … <!-- cheatsheet:end -->` so the dashboard toggle can hide non-cheatsheet content
+
+### Mode C — Both
+
+Produce both files (`class<N>.md` AND `class<N>.html`) following A and B rules respectively. The MD source for both should be the same content with mode-specific quiz syntax: write the MD with ```quiz fences, then for the `.md` output convert ```quiz fences into Obsidian callout format on the way out.
+
+### File naming
+
+- Per-class notes: `class<N>.<ext>`
+- Solutions: `class<N>_solutions.<ext>`
+- Aggregated cheatsheet: `cheatsheet.<ext>`
+
 ## Diagrams
 
 - Use Mermaid (Obsidian renders natively, no plugin needed)
