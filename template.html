@@ -116,7 +116,7 @@ function wrapCheatsheet(html) {
 
 // Pre-process MD: convert ==term== to <mark>...</mark> (marked doesn't handle this natively)
 function preprocessMd(md) {
-  return md.replace(/==([^=\n]+)==/g, '<mark>$1</mark>');
+  return md.replace(/==([\s\S]+?)==/g, '<mark>$1</mark>');
 }
 
 function renderAll() {
