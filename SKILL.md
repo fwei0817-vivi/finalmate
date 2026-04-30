@@ -1,6 +1,6 @@
 ---
 name: study-notes-writer
-description: Use when writing or rewriting technical lecture notes, study guides, or exam prep materials. Triggers on requests like "写笔记 / 复习材料 / lecture notes / study notes / exam prep / 整理这章" for university course content, especially for multiple-choice exams. Designed for Obsidian rendering (Mermaid + ==highlight== + HTML inline). Produces dense, pyramid-structured notes with English-original slide quotes, runnable code examples, and self-quiz questions.
+description: Use when writing or rewriting technical lecture notes, study guides, or exam prep materials. Triggers on requests like "写笔记 / 复习材料 / lecture notes / study notes / exam prep / 整理这章" for university course content. Two output modes: Obsidian MD (with ==highlight==, callouts, mermaid) or interactive HTML (single-file, multi-color highlight tool, clickable quiz with localStorage progress, cheatsheet toggle). Produces dense, pyramid-structured notes with English-original slide quotes, runnable code, and self-quiz questions; anti-bias rules enforced for quiz options.
 ---
 
 # Study Notes Writer
