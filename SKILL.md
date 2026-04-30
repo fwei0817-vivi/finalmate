@@ -369,6 +369,45 @@ After all class notes are written, produce `cheatsheet.<ext>` whose content is t
 
 After producing `cheatsheet.html`, run a rough page estimate (~50 lines per printed page at default settings). If the estimate exceeds Q3.cheatsheet.pages, surface a "trim suggestions" list to the user, ordered low-priority-first (🔥 then 🔥🔥), and ask the user which sections to remove. **Never auto-trim** — the user decides.
 
+## Solutions mode (for problem sets like Class 11)
+
+Trigger: user asks for "solutions" / "answers" / "考题答案" / "exam reference" rather than "notes".
+
+### Differences from notes mode
+
+- **Suppress quiz generation** — the document IS quiz answers. No ```quiz fences, no `> [!question]` callouts.
+- **Heading rule** — same 2-level rule, but each `##` is a problem (not a knowledge module), and `###` are the solving phases (Question / Approach / Step-by-step / Final answer). Meta-section exemption applies: solving-phase `###`s do not need quiz/⭐.
+- **Cheatsheet section content** — becomes "solving patterns": which formula to apply for which problem type, common traps. Not term tables.
+- **Highlight tool stays useful** — user marks "this step I always forget", "this trap caught me" in different colors.
+
+### Per-problem template
+
+```markdown
+## Problem N
+
+### Question
+> [English problem statement preserved verbatim from the slide / exam paper]
+
+### Approach
+⭐ ==One-sentence solving strategy==.
+- **Why this method:** what about the question makes this approach right
+- **Common trap:** what students do wrong
+
+### Step-by-step
+1. Step 1 — including any formulas, with concrete numbers from the problem
+2. Step 2 — show the calculation
+3. Step 3 — final manipulation
+
+### Final answer
+⭐ ==Boxed final answer with units==.
+
+> Sanity check: <one-line verification — does the answer's order of magnitude / sign / units make sense?>
+```
+
+### File naming
+
+`class<N>_solutions.<ext>` (where `<N>` is the exam reference class number, e.g., `class11_solutions.html`).
+
 ## When NOT to use this skill
 
 - User asks for a quick summary, not exam-level notes
