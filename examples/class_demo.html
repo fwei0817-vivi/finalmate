@@ -309,7 +309,52 @@ function initQuiz() {
 }
 initQuiz();
 
-function updateDashboard() { /* placeholder, real impl in Task 8 */ }
+function updateDashboard() {
+  const quizState = store.get('quiz') || {};
+  const total = document.querySelectorAll('.quiz-card').length;
+  const answered = Object.keys(quizState).length;
+  const correct = Object.values(quizState).filter(s => s.firstCorrect).length;
+  const hl = document.querySelectorAll('#rendered mark[class^="hl-"]').length;
+  const cheatsheetLabel = document.body.classList.contains('cheatsheet-only') ? 'Show all' : 'Cheatsheet only';
+
+  const dash = document.getElementById('dashboard');
+  dash.innerHTML = `
+    <strong>${escapeHtml(document.title)}</strong>
+    ${total > 0 ? `<span class="stat">Quiz: ${answered}/${total} done · ${correct} correct</span>` : ''}
+    <span class="stat">Highlights: ${hl}</span>
+    <button id="btn-cheatsheet">${cheatsheetLabel}</button>
+    <button id="btn-export" title="Export progress as JSON">Export</button>
+    <button id="btn-reset" title="Reset quiz + highlights for this file">Reset</button>
+  `;
+
+  document.getElementById('btn-cheatsheet').addEventListener('click', () => {
+    document.body.classList.toggle('cheatsheet-only');
+    updateDashboard();
+  });
+
+  document.getElementById('btn-export').addEventListener('click', () => {
+    const data = {
+      title: document.title,
+      exportedAt: new Date().toISOString(),
+      quiz: store.get('quiz') || {},
+      highlights: store.get('highlights') || null,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${document.title.replace(/[^A-Za-z0-9]+/g, '_')}_progress.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm('Reset all quiz answers and highlights for this file?')) {
+      store.clear();
+      location.reload();
+    }
+  });
+}
+updateDashboard();
 
 function saveHighlights() {
   store.set('highlights', {
