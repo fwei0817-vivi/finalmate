@@ -175,6 +175,47 @@ function renderAll() {
   document.getElementById('rendered').innerHTML = html;
 }
 
+let quizCounter = 0;
+
+const quizExt = {
+  name: 'quiz',
+  level: 'block',
+  start(src) { return src.indexOf('\n```quiz') + 1 || src.indexOf('```quiz'); },
+  tokenizer(src) {
+    const match = src.match(/^```quiz\n([\s\S]*?)\n```/);
+    if (!match) return undefined;
+    const body = match[1];
+    const data = { Q: '', A: '', B: '', C: '', D: '', correct: '', explain: '' };
+    let lastKey = null;
+    for (const line of body.split('\n')) {
+      const m = line.match(/^(Q|A|B|C|D|correct|explain):\s*(.*)$/);
+      if (m) { data[m[1]] = m[2]; lastKey = m[1]; }
+      else if (lastKey) { data[lastKey] += '\n' + line; }
+    }
+    return { type: 'quiz', raw: match[0], ...data };
+  },
+  renderer(t) {
+    quizCounter++;
+    const id = `quiz-${quizCounter}`;
+    const correct = t.correct.trim();
+    const opts = ['A','B','C','D'].map(L =>
+      `<label class="opt" data-letter="${L}"><input type="radio" name="${id}" value="${L}"><span><b>${L}.</b> ${escapeHtml(t[L].trim())}</span></label>`
+    ).join('');
+    return `<div class="quiz-card" data-id="${id}" data-correct="${correct}">
+      <div class="q">${escapeHtml(t.Q.trim())}</div>
+      <div class="options">${opts}</div>
+      <div class="actions">
+        <button class="submit">Submit</button>
+        <button class="show-answer">Show Answer</button>
+        <button class="retry" hidden>Retry</button>
+      </div>
+      <div class="explain"><b>Answer: ${correct}.</b> ${escapeHtml(t.explain.trim())}</div>
+    </div>`;
+  }
+};
+
+marked.use({ extensions: [quizExt] });
+
 renderAll();
 function initMermaid() {
   document.querySelectorAll('pre code.language-mermaid').forEach(code => {
