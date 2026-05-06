@@ -36,6 +36,18 @@ if (typeof markdown === 'string') {
   }
 }
 
+for (const needle of [
+  'function getAssessState()',
+  'saved.hash === sourceHash',
+  'function sectionId(h3, index)',
+  '[sourceHash, index, h2Text, h3Text]'
+]) {
+  if (!html.includes(needle)) failures.push(`Assessment state regression guard missing: ${needle}`);
+}
+if (html.includes('hashStr(h3Text).substring')) {
+  failures.push('Assessment section ids are based only on H3 text');
+}
+
 const scriptRe = /<script(?![^>]+\bsrc=)(?![^>]+type="application\/json")[^>]*>([\s\S]*?)<\/script>/g;
 let scriptIndex = 0;
 for (const match of html.matchAll(scriptRe)) {
@@ -53,4 +65,3 @@ if (failures.length) {
 }
 
 console.log('Demo validation passed');
-

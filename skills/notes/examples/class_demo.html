@@ -649,6 +649,18 @@ const HIGHLIGHT_COLORS = [
 ];
 let activeHighlightColor = store.get('highlightColor') || null;
 
+function getAssessState() {
+  const saved = store.get('assess');
+  if (!saved) return {};
+  if (saved.hash === sourceHash && saved.entries && typeof saved.entries === 'object') {
+    return saved.entries;
+  }
+  return {};
+}
+function setAssessState(entries) {
+  store.set('assess', { hash: sourceHash, entries });
+}
+
 function preprocessMd(md) {
   // Step 1: convert Obsidian-style quiz callouts to ```quiz fences (so they become clickable cards).
   md = convertObsidianQuizCallouts(md);
@@ -902,13 +914,34 @@ if (savedHl && savedHl.hash === sourceHash) {
   const root = document.getElementById('rendered');
   const title = document.title;
 
-  function getAssess() { return store.get('assess') || {}; }
   function setAssessOne(id, patch) {
-    const all = getAssess();
+    const all = getAssessState();
     all[id] = Object.assign({}, all[id] || { rating: null, question: '' }, patch);
     if (!all[id].rating && !all[id].question) delete all[id]; // tidy
-    store.set('assess', all);
+    setAssessState(all);
     updateDashboard();
+  }
+
+  function nearestHeadingText(h3) {
+    let cur = h3.previousElementSibling;
+    while (cur) {
+      if (cur.tagName === 'H2') return cur.textContent.trim();
+      cur = cur.previousElementSibling;
+    }
+    const section = h3.closest('section');
+    cur = section ? section.previousElementSibling : null;
+    while (cur) {
+      if (cur.tagName === 'H2') return cur.textContent.trim();
+      cur = cur.previousElementSibling;
+    }
+    return '';
+  }
+
+  function sectionId(h3, index) {
+    const h2Text = nearestHeadingText(h3);
+    const h3Text = h3.textContent.trim();
+    const seed = [sourceHash, index, h2Text, h3Text].join('|');
+    return `sec-${hashStr(seed).substring(0, 12)}`;
   }
 
   function buildSectionPlainText(sectionEl) {
@@ -934,7 +967,7 @@ if (savedHl && savedHl.hash === sourceHash) {
   }
 
   function makeWidget(id, sectionEl, h3Text) {
-    const state = getAssess()[id] || { rating: null, question: '' };
+    const state = getAssessState()[id] || { rating: null, question: '' };
     if (state.rating) sectionEl.dataset.rating = state.rating;
     else delete sectionEl.dataset.rating;
 
@@ -1028,7 +1061,7 @@ if (savedHl && savedHl.hash === sourceHash) {
 
   // Global helper: build a single prompt collecting every section that has a recorded question.
   window.__collectAllQuestions = function() {
-    const all = getAssess();
+    const all = getAssessState();
     const items = [];
     document.querySelectorAll('.study-section').forEach(sec => {
       const sid = sec.dataset.sid;
@@ -1052,20 +1085,19 @@ if (savedHl && savedHl.hash === sourceHash) {
   // Wrap each H3 section, OR rebuild the widget on an already-wrapped section
   // (saved-highlights restore brings back the wrapper DOM but loses JS handlers).
   const h3s = Array.from(root.querySelectorAll('h3'));
-  h3s.forEach(h3 => {
+  h3s.forEach((h3, index) => {
     // Reset rating dot
     const oldDot = h3.querySelector('.rating-dot');
     if (oldDot) oldDot.remove();
 
     let wrapper = h3.closest('.study-section');
     const h3Text = h3.textContent.trim();
-    const id = (wrapper && wrapper.dataset.sid) || hashStr(h3Text).substring(0, 10);
+    const id = sectionId(h3, index);
 
     // Fresh wrap if needed
     if (!wrapper) {
       wrapper = document.createElement('section');
       wrapper.className = 'study-section';
-      wrapper.dataset.sid = id;
       const parent = h3.parentNode;
       parent.insertBefore(wrapper, h3);
       let cur = h3;
@@ -1080,6 +1112,7 @@ if (savedHl && savedHl.hash === sourceHash) {
       const stale = wrapper.querySelector(':scope > .assess');
       if (stale) stale.remove();
     }
+    wrapper.dataset.sid = id;
 
     // Append fresh rating dot to H3
     const dot = document.createElement('span');
@@ -1167,7 +1200,7 @@ function updateDashboard() {
   const hasCheatsheet = !!document.querySelector('.cheatsheet');
   const cheatsheetLabel = document.body.classList.contains('cheatsheet-only') ? label('showAllLabel') : label('cheatsheetLabel');
   const totalSections = document.querySelectorAll('.study-section').length;
-  const assessState = store.get('assess') || {};
+  const assessState = getAssessState();
   const ratings = Object.values(assessState).map(s => s.rating).filter(Boolean);
   const r1 = ratings.filter(r => r === 1).length;
   const r2 = ratings.filter(r => r === 2).length;
