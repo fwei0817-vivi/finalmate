@@ -1,0 +1,22 @@
+{
+  "name": "finalmate",
+  "owner": {
+    "name": "Fengwei"
+  },
+  "metadata": {
+    "description": "Plugins for study-note writing, exam prep, cheatsheets, and interactive learning pages.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "finalmate",
+      "source": "./",
+      "description": "Generate multi-discipline study notes, cheatsheets, mock exams, and interactive HTML study pages.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fengwei"
+      }
+    }
+  ]
+}
+

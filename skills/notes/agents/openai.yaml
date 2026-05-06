@@ -1,0 +1,8 @@
+interface:
+  display_name: "FinalMate · Notes"
+  short_description: "Create study notes and review pages"
+  brand_color: "#3F6B5B"
+  default_prompt: "Use $notes to turn my class materials into structured study notes and an interactive review page."
+
+policy:
+  allow_implicit_invocation: true

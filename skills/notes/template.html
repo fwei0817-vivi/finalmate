@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}}</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <style>
+:root {
+  --bg: #fbfaf6;
+  --bg-soft: #f4f1ea;
+  --bg-card: #ffffff;
+  --ink: #2a2724;
+  --ink-soft: #5b554f;
+  --ink-mute: #8b847d;
+  --rule: #e6e0d4;
+  --accent: #b8923d;
+  --accent-soft: #d9bf85;
+  --slate: #334155;
+  --slate-soft: #475569;
+  --teal: #0f766e;
+  --rose: #b6406b;
+  --hl-yellow: #fff1a8;
+  --hl-pink:   #ffd1de;
+  --hl-blue:   #c8e2f5;
+  --hl-green:  #cce5d2;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow:    0 2px 12px rgba(40,30,20,0.08);
+  --radius: 6px;
+}
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body {
+  font-family: "Charter", "Iowan Old Style", "Source Serif 4", "Source Serif Pro", "PingFang SC", "Noto Serif SC", Georgia, serif;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 4.2em 1.4em 6em;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg);
+  font-feature-settings: "kern", "liga", "onum";
+}
+::selection { background: rgba(184,146,61,0.22); }
+
+/* Headings */
+h1 {
+  font-size: 1.95em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0.4em 0 0.6em;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--rule);
+}
+h2 {
+  font-size: 1.45em;
+  font-weight: 600;
+  color: var(--slate);
+  margin: 2.4em 0 0.8em;
+  padding-left: 0.7em;
+  border-left: 3px solid var(--accent);
+  letter-spacing: -0.005em;
+}
+h3 {
+  font-size: 1.12em;
+  font-weight: 600;
+  color: var(--slate-soft);
+  margin: 1.8em 0 0.6em;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+h3 .rating-dot {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--rule);
+  margin-left: 0.5em;
+  vertical-align: middle;
+  transition: background 0.2s, transform 0.2s;
+}
+.study-section[data-rating="1"] > h3 .rating-dot { background: #6ea876; }
+.study-section[data-rating="2"] > h3 .rating-dot { background: #d9a23a; }
+.study-section[data-rating="3"] > h3 .rating-dot { background: #c9747a; transform: scale(1.15); }
+
+/* Per-section study wrapper: completed sections recede, stuck sections call attention. */
+.study-section { transition: border-color 0.2s, opacity 0.2s; }
+.study-section[data-rating="1"] > :not(h3):not(.assess) {
+  opacity: 0.62;
+  transition: opacity 0.2s;
+}
+.study-section[data-rating="1"]:hover > :not(h3):not(.assess) { opacity: 1; }
+.study-section[data-rating="3"] {
+  border-left: 3px solid #c9747a;
+  padding-left: 1em;
+  margin-left: -1em;
+}
+
+/* Assessment widget */
+.assess {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  margin: 1.5em 0 0.5em;
+  padding: 0.55em 0.85em;
+  background: var(--bg-soft);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font-size: 0.85em;
+}
+.assess-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.45em;
+  flex-wrap: wrap;
+}
+.assess-label {
+  color: var(--ink-mute);
+  font-weight: 500;
+  margin-right: 0.2em;
+}
+.assess .rate {
+  font-size: 0.95em;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.15em 0.7em;
+  cursor: pointer;
+  color: var(--ink-soft);
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+}
+.assess .rate:hover { transform: translateY(-1px); }
+.assess .rate.active[data-r="1"] { background: #e7f3ea; border-color: #6ea876; color: #2f5e3a; }
+.assess .rate.active[data-r="2"] { background: #fbf3dc; border-color: #d9a23a; color: #6e5614; }
+.assess .rate.active[data-r="3"] { background: #fbe5e8; border-color: #c9747a; color: #7e2c36; }
+.assess-divider { color: var(--rule); margin: 0 0.3em; }
+.assess-toggle {
+  font-size: 0.95em;
+  background: transparent;
+  border: 1px dashed var(--rule);
+  border-radius: 999px;
+  padding: 0.15em 0.8em;
+  cursor: pointer;
+  color: var(--ink-mute);
+  margin-left: auto;
+  transition: color 0.15s, border-color 0.15s;
+}
+.assess-toggle:hover { color: var(--accent); border-color: var(--accent-soft); }
+.assess-toggle.has-content { border-style: solid; color: var(--accent); border-color: var(--accent-soft); }
+.assess-q-body {
+  margin-top: 0.6em;
+  display: grid;
+  gap: 0.5em;
+}
+.assess-q-body[hidden] { display: none; }
+.assess textarea {
+  font-family: inherit;
+  font-size: 0.95em;
+  width: 100%;
+  min-height: 70px;
+  padding: 0.55em 0.7em;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--ink);
+  resize: vertical;
+  line-height: 1.5;
+}
+.assess textarea:focus { outline: none; border-color: var(--accent-soft); box-shadow: 0 0 0 2px rgba(184,146,61,0.12); }
+.assess-actions { display: flex; gap: 0.45em; align-items: center; }
+.assess-actions .save-state { color: var(--ink-mute); font-size: 0.92em; margin-left: auto; font-style: italic; }
+.assess-copy {
+  font-size: 0.92em;
+  background: var(--ink);
+  color: var(--bg);
+  border: 1px solid var(--ink);
+  border-radius: 4px;
+  padding: 0.32em 0.85em;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.assess-copy:hover { opacity: 0.85; }
+.assess-copy.copied { background: var(--teal); border-color: var(--teal); }
+
+p { margin: 0.7em 0; }
+strong { font-weight: 600; color: var(--ink); }
+em { font-style: italic; color: var(--ink-soft); }
+
+a { color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(15,118,110,0.3); }
+a:hover { border-bottom-color: var(--teal); }
+a.wikilink {
+  color: var(--accent);
+  background: rgba(184,146,61,0.08);
+  border-bottom: 1px dashed var(--accent-soft);
+  padding: 0 0.2em;
+  border-radius: 3px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  font-size: 0.95em;
+}
+a.wikilink::before { content: "🔗 "; opacity: 0.6; font-size: 0.85em; }
+a.wikilink:hover { background: rgba(184,146,61,0.18); border-bottom-style: solid; }
+
+ul, ol { padding-left: 1.6em; margin: 0.6em 0; }
+li { margin: 0.25em 0; }
+
+hr { border: 0; border-top: 1px solid var(--rule); margin: 2.5em 0; }
+
+/* Blockquote (slide quote) */
+blockquote {
+  border-left: 3px solid var(--accent-soft);
+  padding: 0.7em 1.1em;
+  background: var(--bg-soft);
+  color: var(--ink-soft);
+  margin: 1.2em 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.97em;
+}
+blockquote p:first-child { margin-top: 0; }
+blockquote p:last-child { margin-bottom: 0; }
+
+/* Tables */
+table { border-collapse: collapse; margin: 1.2em 0; width: 100%; font-size: 0.95em; }
+th, td { border: 1px solid var(--rule); padding: 0.55em 0.85em; text-align: left; vertical-align: top; }
+th { background: var(--bg-soft); font-weight: 600; color: var(--slate); }
+tbody tr:nth-child(even) { background: rgba(244,241,234,0.5); }
+
+/* Inline & block code */
+code {
+  font-family: "JetBrains Mono", "SF Mono", "Menlo", "Monaco", monospace;
+  font-size: 0.88em;
+  background: var(--bg-soft);
+  padding: 0.12em 0.4em;
+  border-radius: 4px;
+  color: var(--rose);
+}
+pre {
+  position: relative;
+  background: #2a2724;
+  color: #f4f1ea;
+  padding: 1.1em 1.2em;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-size: 0.85em;
+  line-height: 1.55;
+  margin: 1.2em 0;
+  box-shadow: var(--shadow-sm);
+}
+pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+pre .lang-tag {
+  position: absolute;
+  top: 0.5em;
+  left: 1em;
+  font-family: -apple-system, sans-serif;
+  font-size: 0.7em;
+  color: rgba(244,241,234,0.5);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+pre .copy-btn {
+  position: absolute;
+  top: 0.4em;
+  right: 0.5em;
+  font-family: -apple-system, sans-serif;
+  font-size: 0.72em;
+  color: rgba(244,241,234,0.6);
+  background: transparent;
+  border: 1px solid rgba(244,241,234,0.2);
+  border-radius: 4px;
+  padding: 0.15em 0.6em;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+}
+pre:hover .copy-btn { opacity: 1; }
+pre .copy-btn:hover { color: #f4f1ea; border-color: rgba(244,241,234,0.5); }
+pre .copy-btn.copied { color: #95d3a2; border-color: #95d3a2; opacity: 1; }
+
+/* Highlight */
+mark { padding: 0 0.18em; border-radius: 2px; }
+mark:not([class]) { background: var(--hl-yellow); }
+mark.hl-yellow { background: var(--hl-yellow); }
+mark.hl-pink   { background: var(--hl-pink); }
+mark.hl-blue   { background: var(--hl-blue); }
+mark.hl-green  { background: var(--hl-green); }
+
+/* Top dashboard */
+#dashboard {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: rgba(251,250,246,0.92);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.55em 1.2em;
+  display: flex;
+  gap: 0.9em;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 50;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.84em;
+  color: var(--ink-soft);
+}
+#dashboard .title-pill {
+  font-weight: 600;
+  color: var(--ink);
+  font-size: 0.95em;
+  margin-right: auto;
+  letter-spacing: -0.005em;
+}
+#dashboard .stat {
+  padding: 0.18em 0.6em;
+  background: var(--bg-card);
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+#dashboard button {
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.2em 0.7em;
+  cursor: pointer;
+  border: 1px solid var(--rule);
+  background: var(--bg-card);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  transition: color 0.15s, border-color 0.15s;
+}
+#dashboard button:hover { color: var(--accent); border-color: var(--accent-soft); }
+#dashboard .dash-highlighter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.12em 0.45em;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+}
+#dashboard .dash-highlighter-label {
+  font-size: 0.9em;
+  color: var(--ink-mute);
+  padding: 0 0.2em;
+}
+#dashboard button.dash-swatch {
+  width: 1.25em;
+  height: 1.25em;
+  padding: 0;
+  border-radius: 50%;
+  color: transparent;
+  overflow: hidden;
+}
+#dashboard button.dash-swatch.active {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-color: var(--ink);
+}
+#dashboard .swatch-yellow { background: var(--hl-yellow); }
+#dashboard .swatch-pink   { background: var(--hl-pink); }
+#dashboard .swatch-blue   { background: var(--hl-blue); }
+#dashboard .swatch-green  { background: var(--hl-green); }
+
+/* Highlight popover (compact, fluid) */
+#hl-toolbar {
+  position: absolute;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  padding: 4px;
+  display: flex;
+  gap: 4px;
+  z-index: 100;
+  animation: pop-in 0.12s ease-out;
+}
+@keyframes pop-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+#hl-toolbar[hidden] { display: none; }
+#hl-toolbar button {
+  width: 24px; height: 24px;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0,0,0,0.6);
+  background: var(--bg-card);
+  transition: transform 0.1s;
+  position: relative;
+}
+#hl-toolbar button:hover { transform: scale(1.15); }
+#hl-toolbar .hint {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  font-size: 10px;
+  color: var(--ink-mute);
+  align-self: center;
+  padding: 0 6px 0 2px;
+  white-space: nowrap;
+}
+#hl-toolbar .swatch-yellow { background: var(--hl-yellow); }
+#hl-toolbar .swatch-pink   { background: var(--hl-pink); }
+#hl-toolbar .swatch-blue   { background: var(--hl-blue); }
+#hl-toolbar .swatch-green  { background: var(--hl-green); }
+#hl-toolbar .swatch-remove { background: var(--bg-card); font-weight: 600; }
+
+/* Quiz card */
+.quiz-card {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.05em 1.25em;
+  margin: 1.6em 0;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  font-size: 0.95em;
+}
+.quiz-card .q { font-weight: 600; margin-bottom: 0.85em; color: var(--ink); line-height: 1.55; }
+.quiz-card .options { display: flex; flex-direction: column; gap: 0.5em; }
+.quiz-card .opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7em;
+  padding: 0.55em 0.85em;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--bg);
+  line-height: 1.5;
+  transition: background 0.1s, border-color 0.1s;
+}
+.quiz-card .opt input { margin-top: 0.3em; accent-color: var(--accent); }
+.quiz-card .opt:hover { background: var(--bg-soft); }
+.quiz-card .opt.selected { border-color: var(--accent); background: rgba(184,146,61,0.08); }
+.quiz-card.answered .opt { cursor: default; }
+.quiz-card.answered .opt:hover { background: var(--bg); }
+.quiz-card.answered .opt.selected:hover { background: rgba(184,146,61,0.08); }
+.quiz-card.answered .opt.correct { background: #e7f3ea; border-color: #6ea876; color: var(--ink); }
+.quiz-card.answered .opt.wrong   { background: #fbe5e8; border-color: #c97a86; color: var(--ink); }
+.quiz-card .actions { margin-top: 0.95em; display: flex; gap: 0.55em; }
+.quiz-card .actions button {
+  font-family: inherit;
+  font-size: 0.92em;
+  padding: 0.32em 0.95em;
+  cursor: pointer;
+  border: 1px solid var(--rule);
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+}
+.quiz-card .actions button:hover { color: var(--accent); border-color: var(--accent-soft); }
+.quiz-card .explain {
+  display: none;
+  margin-top: 0.95em;
+  padding: 0.75em 1em;
+  background: var(--bg-soft);
+  border-left: 3px solid var(--teal);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.93em;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.quiz-card.answered .explain { display: block; }
+
+/* Cheatsheet */
+.cheatsheet {
+  background: rgba(184,146,61,0.06);
+  border: 1px dashed var(--accent-soft);
+  padding: 1.1em 1.3em;
+  border-radius: var(--radius);
+  margin: 1.8em 0;
+}
+body.cheatsheet-only main > :not(.cheatsheet) { display: none; }
+
+/* Toast */
+#toast {
+  position: fixed;
+  bottom: 1.5em; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 0.55em 1.1em;
+  border-radius: 999px;
+  font-family: -apple-system, sans-serif;
+  font-size: 0.85em;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.mermaid { background: var(--bg-card); padding: 0.8em; border-radius: var(--radius); border: 1px solid var(--rule); }
+
+/* Print */
+@media print {
+  body { padding: 0.5em; max-width: none; font-size: 9.5pt; line-height: 1.45; background: white; }
+  #dashboard, #hl-toolbar, #toast, .copy-btn, .quiz-card .actions, .assess { display: none; }
+  .study-section[data-rating="3"] { border-left: 0; padding-left: 0; margin-left: 0; }
+  pre { background: #f6f3ec; color: #2a2724; box-shadow: none; }
+  pre .lang-tag { display: none; }
+  mark { background: transparent !important; border-bottom: 1px dotted #888; }
+  h1, h2, h3 { page-break-after: avoid; }
+  blockquote, pre, table, .quiz-card { page-break-inside: avoid; }
+  a { color: var(--ink); border-bottom: none; }
+}
+  </style>
+</head>
+<body>
+  <header id="dashboard"></header>
+  <main id="rendered"></main>
+  <div id="hl-toolbar" hidden></div>
+  <div id="toast"></div>
+
+  <script type="application/json" id="content-json">{{MD_CONTENT_JSON}}</script>
+  <script type="application/json" id="ui-labels-json">{{UI_LABELS_JSON}}</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.getElementById('rendered'),{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false},{left:'\\\\(',right:'\\\\)',display:false},{left:'\\\\[',right:'\\\\]',display:true}],throwOnError:false,strict:false});"></script>
+  <script>
+const NS = `notes:${location.pathname}`;
+const store = {
+  get(key) { try { return JSON.parse(localStorage.getItem(`${NS}:${key}`)); } catch { return null; } },
+  set(key, val) { localStorage.setItem(`${NS}:${key}`, JSON.stringify(val)); },
+  clear() { Object.keys(localStorage).filter(k => k.startsWith(NS)).forEach(k => localStorage.removeItem(k)); }
+};
+
+const DEFAULT_LABELS = {
+  wikilinkTitle: 'Open {target}.html. Generate the matching Mode B file first if it does not exist.',
+  submit: 'Submit',
+  showAnswer: 'Show Answer',
+  retry: 'Retry',
+  answerPrefix: 'Answer: {correct}.',
+  codeCopy: 'Copy',
+  codeCopied: 'Copied',
+  assessmentLabel: 'Self-check',
+  ratingGot: 'Got it',
+  ratingPartial: 'Partial',
+  ratingStuck: 'Stuck',
+  ratingGotTitle: 'I understand this section',
+  ratingPartialTitle: 'I partly understand this section',
+  ratingStuckTitle: 'I need help with this section',
+  questionPrompt: '❓ Remaining question?',
+  questionRecorded: '❓ Question saved',
+  questionPlaceholder: 'Write your question here. It autosaves.',
+  copySection: 'Copy Section',
+  copySectionTitle: 'Copy this section and your question as one AI prompt',
+  copySectionCopied: 'Copied',
+  saved: 'Saved',
+  sectionPromptIntro: 'Please help me understand this section from "{title}".',
+  sectionPromptSection: 'Section: {section}',
+  sectionPromptQuestion: 'My question: {question}',
+  sectionPromptNoQuestion: '(no question written yet)',
+  sectionPromptContent: 'Section content:',
+  allPromptIntro: 'Please help me understand these questions from "{title}". I am listing only the saved questions; ask me if you need section context.',
+  allPromptSeparator: '----------------------------------------',
+  allPromptItem: 'Question {index}: from "{section}"',
+  selectAnswerToast: 'Choose an answer first',
+  noQuestionsToast: 'No saved questions yet',
+  askAllTitle: 'Copy all saved questions as one AI prompt',
+  askAllButton: 'Copy Questions ({count})',
+  askAllCopied: 'Copied {count} questions',
+  copiedToClipboard: 'Copied. Paste into any AI assistant.',
+  copyFailedToast: 'Copy failed',
+  dashboardRatingsTitle: 'Self-check distribution: got it / partial / stuck',
+  quizStat: 'Quiz {answered}/{total} · {correct}✓',
+  highlightsStat: 'HL {count}',
+  cheatsheetLabel: 'Cheatsheet View',
+  showAllLabel: 'Full Notes',
+  resetLabel: 'Reset',
+  resetTitle: 'Reset progress for this file',
+  resetConfirm: 'Reset all quiz answers, self-checks, questions, and highlights for this file?',
+  highlighterLabel: 'Highlighter',
+  highlighterTitle: 'Pick a color first, then select text to highlight automatically.',
+  highlighterColorTitle: 'Use {color} as the active highlighter. Select text to apply it.',
+  highlighterOffToast: 'Highlighter off',
+  highlighterOnToast: '{color} highlighter on',
+  highlightHint: 'Click a color or press 1-4 →',
+  highlightShortcutTitle: 'Highlight {color} — shortcut {key}',
+  removeHighlightTitle: 'Remove highlight — shortcut 0'
+};
+
+function readLabels() {
+  const el = document.getElementById('ui-labels-json');
+  if (!el) return DEFAULT_LABELS;
+  try {
+    const parsed = JSON.parse(el.textContent || '{}');
+    return Object.assign({}, DEFAULT_LABELS, parsed && typeof parsed === 'object' ? parsed : {});
+  } catch (err) {
+    console.warn('Unable to parse UI labels JSON; falling back to English labels.', err);
+    return DEFAULT_LABELS;
+  }
+}
+
+function readMarkdown() {
+  const raw = document.getElementById('content-json').textContent;
+  try { return JSON.parse(raw); }
+  catch (err) {
+    document.getElementById('rendered').textContent = `Unable to parse embedded markdown JSON: ${err.message}`;
+    throw err;
+  }
+}
+function hashStr(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return h.toString(36); }
+function escapeHtml(s) { return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+const labels = readLabels();
+function label(key, vars = {}) {
+  return String(labels[key] ?? DEFAULT_LABELS[key] ?? key).replace(/\{(\w+)\}/g, (_m, name) =>
+    Object.prototype.hasOwnProperty.call(vars, name) ? vars[name] : `{${name}}`
+  );
+}
+function showToast(msg, ms = 1600) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), ms);
+}
+function copyText(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text);
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); resolve(); } catch (e) { reject(e); }
+    finally { document.body.removeChild(ta); }
+  });
+}
+
+const sourceMarkdown = readMarkdown();
+const sourceHash = hashStr(sourceMarkdown);
+const HIGHLIGHT_COLORS = [
+  { c: 'yellow', key: '1' },
+  { c: 'pink',   key: '2' },
+  { c: 'blue',   key: '3' },
+  { c: 'green',  key: '4' },
+];
+let activeHighlightColor = store.get('highlightColor') || null;
+
+function preprocessMd(md) {
+  // Step 1: convert Obsidian-style quiz callouts to ```quiz fences (so they become clickable cards).
+  md = convertObsidianQuizCallouts(md);
+  // Step 2: convert [[wikilinks]] to anchor tags pointing at the sibling .html (Obsidian-compatible).
+  md = md.replace(/\[\[([^\]\n]+?)\]\]/g, (_m, inner) => {
+    const [target, alias] = inner.split('|').map(s => s.trim());
+    if (!target) return _m;
+    const display = alias || target;
+    const href = encodeURI(target) + '.html';
+    return `<a class="wikilink" href="${href}" title="${escapeHtml(label('wikilinkTitle', { target }))}">${escapeHtml(display)}</a>`;
+  });
+  // Step 3: ==term== highlights (applied last, won't affect fence bodies meaningfully).
+  return md.replace(/==([\s\S]+?)==/g, '<mark>$1</mark>');
+}
+
+function convertObsidianQuizCallouts(md) {
+  const lines = md.split('\n');
+  const out = [];
+  let i = 0;
+  while (i < lines.length) {
+    if (/^>\s*\[!question\]/i.test(lines[i])) {
+      // Greedily collect consecutive '>' lines (the entire callout block, including nested > > success).
+      const block = [];
+      let j = i;
+      while (j < lines.length && /^>/.test(lines[j])) {
+        block.push(lines[j]);
+        j++;
+      }
+      const fence = parseQuizCallout(block);
+      if (fence) out.push(fence);
+      else out.push(...block);
+      i = j;
+    } else {
+      out.push(lines[i]);
+      i++;
+    }
+  }
+  return out.join('\n');
+}
+
+function parseQuizCallout(blockLines) {
+  let qStem = '';
+  const opts = { A: '', B: '', C: '', D: '' };
+  let correct = '';
+  const explainParts = [];
+
+  for (let i = 1; i < blockLines.length; i++) {
+    const raw = blockLines[i];
+    // Nested success callout: line starts with `> >`
+    if (/^>\s*>/.test(raw)) {
+      const inner = raw.replace(/^>\s*>\s?/, '');
+      if (/^\[!success\]/i.test(inner)) continue; // skip the success title line
+      const m = inner.match(/^\*\*([A-D])\*\*\.\s*(.*)/);
+      if (m && !correct) {
+        correct = m[1];
+        if (m[2]) explainParts.push(m[2]);
+      } else if (inner.trim()) {
+        explainParts.push(inner.trim());
+      }
+      continue;
+    }
+    // Top-level callout line
+    if (raw.startsWith('>')) {
+      const stripped = raw.replace(/^>\s?/, '');
+      if (!stripped.trim()) continue;
+      const optMatch = stripped.match(/^([A-D])\.\s+(.*)/);
+      if (optMatch) {
+        opts[optMatch[1]] = optMatch[2].trim();
+      } else if (!opts.A) {
+        // Still in stem (haven't seen any options yet)
+        qStem += (qStem ? ' ' : '') + stripped.trim();
+      }
+    }
+  }
+
+  if (!qStem || !opts.A || !opts.B || !opts.C || !opts.D || !correct) return null;
+  return [
+    '```quiz',
+    `Q: ${qStem}`,
+    `A: ${opts.A}`,
+    `B: ${opts.B}`,
+    `C: ${opts.C}`,
+    `D: ${opts.D}`,
+    `correct: ${correct}`,
+    `explain: ${explainParts.join(' ').trim()}`,
+    '```'
+  ].join('\n');
+}
+function wrapCheatsheet(html) {
+  return html.replace(/<!--\s*cheatsheet:start\s*-->([\s\S]*?)<!--\s*cheatsheet:end\s*-->/g,
+    '<section class="cheatsheet">$1</section>');
+}
+
+function getQuizState() {
+  const saved = store.get('quiz');
+  if (!saved) return {};
+  if (saved.hash && saved.hash !== sourceHash) return {};
+  if (saved.answers) return saved.answers;
+  return saved;
+}
+function setQuizState(answers) { store.set('quiz', { hash: sourceHash, answers }); }
+
+let quizCounter = 0;
+const quizExt = {
+  name: 'quiz',
+  level: 'block',
+  start(src) { const i = src.indexOf('```quiz'); return i >= 0 ? i : undefined; },
+  tokenizer(src) {
+    const m = src.match(/^```quiz\n([\s\S]*?)\n```/);
+    if (!m) return undefined;
+    const data = { Q: '', A: '', B: '', C: '', D: '', correct: '', explain: '' };
+    let lastKey = null;
+    for (const line of m[1].split('\n')) {
+      const km = line.match(/^(Q|A|B|C|D|correct|explain):\s*(.*)$/);
+      if (km) { data[km[1]] = km[2]; lastKey = km[1]; }
+      else if (lastKey) { data[lastKey] += '\n' + line; }
+    }
+    return { type: 'quiz', raw: m[0], ...data };
+  },
+  renderer(t) {
+    quizCounter++;
+    const id = `quiz-${quizCounter}`;
+    const correct = t.correct.trim().toUpperCase();
+    const opts = ['A','B','C','D'].map(L =>
+      `<label class="opt" data-letter="${L}"><input type="radio" name="${id}" value="${L}"><span><b>${L}.</b> ${escapeHtml(t[L].trim())}</span></label>`
+    ).join('');
+    return `<div class="quiz-card" data-id="${id}" data-correct="${correct}">
+      <div class="q">${escapeHtml(t.Q.trim())}</div>
+      <div class="options">${opts}</div>
+      <div class="actions">
+        <button class="submit">${escapeHtml(label('submit'))}</button>
+        <button class="show-answer">${escapeHtml(label('showAnswer'))}</button>
+        <button class="retry" hidden>${escapeHtml(label('retry'))}</button>
+      </div>
+      <div class="explain"><b>${escapeHtml(label('answerPrefix', { correct }))}</b> ${escapeHtml(t.explain.trim())}</div>
+    </div>`;
+  }
+};
+
+if (!window.marked) {
+  document.getElementById('rendered').textContent = 'Unable to render: marked.js did not load.';
+  throw new Error('marked.js failed to load');
+}
+marked.use({ extensions: [quizExt] });
+
+(function renderAll() {
+  let md = preprocessMd(sourceMarkdown);
+  let html = marked.parse(md);
+  html = wrapCheatsheet(html);
+  document.getElementById('rendered').innerHTML = html;
+})();
+
+function cleanupEmptyWrappers(root) {
+  root.querySelectorAll('mark, blockquote, p, span:not(.title-pill):not(.stat):not(.assess-label):not(.assess-divider):not(.kbd):not(.lang-tag):not(.save-state):not(.hint):not(.rating-dot)').forEach(el => {
+    if (!el.textContent.trim() && el.children.length === 0) el.remove();
+  });
+}
+function isUserHighlight(node) {
+  return !!(node && node.matches && node.matches('mark[class^="hl-"]'));
+}
+function unwrapNode(node) {
+  while (node.firstChild) node.parentNode.insertBefore(node.firstChild, node);
+  node.remove();
+}
+function normalizeHighlights(root) {
+  // Older/sticky highlight flows could create nested <mark> nodes. Flatten them so
+  // repeated highlighting is idempotent instead of visually shredding text.
+  root.querySelectorAll('mark[class^="hl-"] mark[class^="hl-"]').forEach(inner => unwrapNode(inner));
+  root.querySelectorAll('mark[class^="hl-"]').forEach(mark => {
+    if (!mark.textContent) {
+      mark.remove();
+      return;
+    }
+    const parentMark = mark.parentElement && mark.parentElement.closest('mark[class^="hl-"]');
+    if (parentMark) unwrapNode(mark);
+  });
+
+  let merged = true;
+  while (merged) {
+    merged = false;
+    root.querySelectorAll('mark[class^="hl-"]').forEach(mark => {
+      let next = mark.nextSibling;
+      while (next && next.nodeType === Node.TEXT_NODE && next.textContent === '') {
+        const empty = next;
+        next = next.nextSibling;
+        empty.remove();
+      }
+      if (isUserHighlight(next) && next.className === mark.className) {
+        while (next.firstChild) mark.appendChild(next.firstChild);
+        next.remove();
+        merged = true;
+      }
+    });
+  }
+  root.normalize();
+}
+
+const savedHl = store.get('highlights');
+if (savedHl && savedHl.hash === sourceHash) {
+  document.getElementById('rendered').innerHTML = savedHl.html;
+  cleanupEmptyWrappers(document.getElementById('rendered'));
+  normalizeHighlights(document.getElementById('rendered'));
+  saveHighlights();
+}
+
+(function initMermaid() {
+  document.querySelectorAll('pre code.language-mermaid').forEach(code => {
+    const div = document.createElement('div');
+    div.className = 'mermaid';
+    div.textContent = code.textContent;
+    code.parentElement.replaceWith(div);
+  });
+  if (window.mermaid) {
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    Promise.resolve(mermaid.run()).catch(err => console.error('Mermaid render failed:', err));
+  }
+})();
+
+/* Code blocks: language tag + copy button */
+(function decorateCode() {
+  document.querySelectorAll('pre').forEach(pre => {
+    if (pre.querySelector('.copy-btn')) return; // idempotent
+    const codeEl = pre.querySelector('code');
+    let lang = '';
+    if (codeEl) {
+      const m = (codeEl.className || '').match(/language-([\w-]+)/);
+      if (m && m[1] !== 'mermaid') lang = m[1];
+    }
+    if (lang) {
+      const tag = document.createElement('span');
+      tag.className = 'lang-tag';
+      tag.textContent = lang;
+      pre.appendChild(tag);
+    }
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = label('codeCopy');
+    btn.addEventListener('click', () => {
+      copyText(codeEl ? codeEl.textContent : pre.textContent).then(() => {
+        btn.textContent = label('codeCopied'); btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = label('codeCopy'); btn.classList.remove('copied'); }, 1200);
+      });
+    });
+    pre.appendChild(btn);
+  });
+})();
+
+/* Per-section assessment widget: rating + collapsible question + clipboard copy.
+   Wraps each H3 section in a .study-section so we can dim/highlight by rating. */
+(function addAssessmentWidgets() {
+  const root = document.getElementById('rendered');
+  const title = document.title;
+
+  function getAssess() { return store.get('assess') || {}; }
+  function setAssessOne(id, patch) {
+    const all = getAssess();
+    all[id] = Object.assign({}, all[id] || { rating: null, question: '' }, patch);
+    if (!all[id].rating && !all[id].question) delete all[id]; // tidy
+    store.set('assess', all);
+    updateDashboard();
+  }
+
+  function buildSectionPlainText(sectionEl) {
+    // Skip the trailing .assess widget when collecting text
+    const parts = [];
+    sectionEl.querySelectorAll(':scope > *:not(.assess)').forEach(el => {
+      parts.push(el.innerText || el.textContent || '');
+    });
+    return parts.join('\n\n').trim();
+  }
+
+  function buildSectionPrompt(sectionTitle, question, sectionText) {
+    const q = question || label('sectionPromptNoQuestion');
+    return [
+      label('sectionPromptIntro', { title }),
+      '',
+      label('sectionPromptSection', { section: sectionTitle }),
+      label('sectionPromptQuestion', { question: q }),
+      '',
+      label('sectionPromptContent'),
+      sectionText
+    ].join('\n');
+  }
+
+  function makeWidget(id, sectionEl, h3Text) {
+    const state = getAssess()[id] || { rating: null, question: '' };
+    if (state.rating) sectionEl.dataset.rating = state.rating;
+    else delete sectionEl.dataset.rating;
+
+    const widget = document.createElement('div');
+    widget.className = 'assess';
+    widget.dataset.id = id;
+    const hasQ = !!state.question;
+    widget.innerHTML = `
+      <div class="assess-bar">
+        <span class="assess-label">${escapeHtml(label('assessmentLabel'))}</span>
+        <button type="button" class="rate" data-r="1" title="${escapeHtml(label('ratingGotTitle'))}">🟢 ${escapeHtml(label('ratingGot'))}</button>
+        <button type="button" class="rate" data-r="2" title="${escapeHtml(label('ratingPartialTitle'))}">🟡 ${escapeHtml(label('ratingPartial'))}</button>
+        <button type="button" class="rate" data-r="3" title="${escapeHtml(label('ratingStuckTitle'))}">🔴 ${escapeHtml(label('ratingStuck'))}</button>
+        <span class="assess-divider">|</span>
+        <button type="button" class="assess-toggle ${hasQ ? 'has-content' : ''}">${escapeHtml(hasQ ? label('questionRecorded') : label('questionPrompt'))}</button>
+      </div>
+      <div class="assess-q-body" ${hasQ ? '' : 'hidden'}>
+        <textarea placeholder="${escapeHtml(label('questionPlaceholder'))}"></textarea>
+        <div class="assess-actions">
+          <button type="button" class="assess-copy" title="${escapeHtml(label('copySectionTitle'))}">${escapeHtml(label('copySection'))}</button>
+          <span class="save-state" hidden>${escapeHtml(label('saved'))}</span>
+        </div>
+      </div>
+    `;
+
+    // Restore button highlight & textarea content
+    if (state.rating) {
+      const activeBtn = widget.querySelector(`.rate[data-r="${state.rating}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+    }
+    const ta = widget.querySelector('textarea');
+    ta.value = state.question || '';
+
+    // Rating handlers (toggle off if clicking the same one)
+    widget.querySelectorAll('.rate').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const r = parseInt(btn.dataset.r, 10);
+        const cur = sectionEl.dataset.rating ? parseInt(sectionEl.dataset.rating, 10) : null;
+        const next = (cur === r) ? null : r;
+        widget.querySelectorAll('.rate').forEach(b => b.classList.remove('active'));
+        if (next !== null) {
+          btn.classList.add('active');
+          sectionEl.dataset.rating = String(next);
+        } else {
+          delete sectionEl.dataset.rating;
+        }
+        setAssessOne(id, { rating: next });
+      });
+    });
+
+    // Question toggle
+    const toggle = widget.querySelector('.assess-toggle');
+    const body = widget.querySelector('.assess-q-body');
+    toggle.addEventListener('click', () => {
+      body.hidden = !body.hidden;
+      if (!body.hidden) ta.focus();
+    });
+
+    const copyBtn = widget.querySelector('.assess-copy');
+    copyBtn.addEventListener('click', () => {
+      const prompt = buildSectionPrompt(h3Text, ta.value.trim(), buildSectionPlainText(sectionEl));
+      copyText(prompt).then(() => {
+        copyBtn.textContent = label('copySectionCopied');
+        copyBtn.classList.add('copied');
+        showToast(label('copiedToClipboard'));
+        setTimeout(() => {
+          copyBtn.textContent = label('copySection');
+          copyBtn.classList.remove('copied');
+        }, 1400);
+      }).catch(() => showToast(label('copyFailedToast')));
+    });
+
+    // Textarea autosave (debounced)
+    let saveTimer = null;
+    const saveState = widget.querySelector('.save-state');
+    ta.addEventListener('input', () => {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        const v = ta.value.trim();
+        setAssessOne(id, { question: v });
+        toggle.textContent = v ? label('questionRecorded') : label('questionPrompt');
+        toggle.classList.toggle('has-content', !!v);
+        saveState.hidden = false;
+        saveState.textContent = label('saved');
+        setTimeout(() => { saveState.hidden = true; }, 900);
+      }, 350);
+    });
+
+    return widget;
+  }
+
+  // Global helper: build a single prompt collecting every section that has a recorded question.
+  window.__collectAllQuestions = function() {
+    const all = getAssess();
+    const items = [];
+    document.querySelectorAll('.study-section').forEach(sec => {
+      const sid = sec.dataset.sid;
+      const entry = all[sid];
+      if (!entry || !entry.question || !entry.question.trim()) return;
+      const h3 = sec.querySelector('h3');
+      const h3Text = h3 ? h3.textContent.trim() : '(unknown section)';
+      items.push({ h3: h3Text, q: entry.question.trim() });
+    });
+    if (items.length === 0) return null;
+    const blocks = items.map((it, i) =>
+      [
+        label('allPromptSeparator'),
+        label('allPromptItem', { index: i + 1, section: it.h3 }),
+        label('sectionPromptQuestion', { question: it.q })
+      ].join('\n')
+    ).join('\n\n');
+    return `${label('allPromptIntro', { title })}\n\n${blocks}\n${label('allPromptSeparator')}`;
+  };
+
+  // Wrap each H3 section, OR rebuild the widget on an already-wrapped section
+  // (saved-highlights restore brings back the wrapper DOM but loses JS handlers).
+  const h3s = Array.from(root.querySelectorAll('h3'));
+  h3s.forEach(h3 => {
+    // Reset rating dot
+    const oldDot = h3.querySelector('.rating-dot');
+    if (oldDot) oldDot.remove();
+
+    let wrapper = h3.closest('.study-section');
+    const h3Text = h3.textContent.trim();
+    const id = (wrapper && wrapper.dataset.sid) || hashStr(h3Text).substring(0, 10);
+
+    // Fresh wrap if needed
+    if (!wrapper) {
+      wrapper = document.createElement('section');
+      wrapper.className = 'study-section';
+      wrapper.dataset.sid = id;
+      const parent = h3.parentNode;
+      parent.insertBefore(wrapper, h3);
+      let cur = h3;
+      const nodesToMove = [];
+      while (cur && !(cur !== h3 && (/^H[123]$/.test(cur.tagName) || cur.classList?.contains('cheatsheet')))) {
+        nodesToMove.push(cur);
+        cur = cur.nextElementSibling;
+      }
+      nodesToMove.forEach(n => wrapper.appendChild(n));
+    } else {
+      // Remove stale widget so we can rebuild with live handlers
+      const stale = wrapper.querySelector(':scope > .assess');
+      if (stale) stale.remove();
+    }
+
+    // Append fresh rating dot to H3
+    const dot = document.createElement('span');
+    dot.className = 'rating-dot';
+    h3.appendChild(dot);
+
+    // Build & append fresh widget (state comes from localStorage)
+    const widget = makeWidget(id, wrapper, h3Text);
+    wrapper.appendChild(widget);
+  });
+})();
+
+/* Quiz interactions */
+(function initQuiz() {
+  const state = getQuizState();
+  document.querySelectorAll('.quiz-card').forEach(card => {
+    const id = card.dataset.id;
+    const correct = card.dataset.correct;
+    const cardState = state[id] || { selected: null, firstCorrect: null, attempts: 0 };
+
+    if (cardState.firstCorrect !== null && cardState.selected) {
+      const input = card.querySelector(`input[value="${cardState.selected}"]`);
+      if (input) input.checked = true;
+      markAnswered(card, cardState.selected, correct);
+    }
+
+    card.querySelectorAll('input').forEach(i => i.addEventListener('change', () => {
+      card.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+      i.closest('.opt').classList.add('selected');
+    }));
+
+    card.querySelector('.submit').addEventListener('click', () => {
+      const sel = card.querySelector('input:checked');
+      if (!sel) { showToast(label('selectAnswerToast')); return; }
+      const v = sel.value;
+      const isCorrect = (v === correct);
+      cardState.selected = v;
+      cardState.attempts++;
+      if (cardState.firstCorrect === null) cardState.firstCorrect = isCorrect;
+      state[id] = cardState;
+      setQuizState(state);
+      markAnswered(card, v, correct);
+      updateDashboard();
+    });
+
+    card.querySelector('.show-answer').addEventListener('click', () => {
+      if (cardState.firstCorrect === null) {
+        cardState.firstCorrect = false;
+        cardState.attempts = Math.max(cardState.attempts, 1);
+      }
+      cardState.selected = cardState.selected || correct;
+      state[id] = cardState;
+      setQuizState(state);
+      markAnswered(card, cardState.selected, correct);
+      updateDashboard();
+    });
+
+    card.querySelector('.retry').addEventListener('click', () => {
+      card.classList.remove('answered');
+      card.querySelectorAll('input').forEach(i => { i.checked = false; i.disabled = false; });
+      card.querySelectorAll('.opt').forEach(o => o.classList.remove('selected', 'correct', 'wrong'));
+      card.querySelector('.retry').hidden = true;
+    });
+  });
+  function markAnswered(card, selected, correct) {
+    card.classList.add('answered');
+    card.querySelectorAll('.opt').forEach(o => {
+      const v = o.querySelector('input').value;
+      o.classList.remove('correct', 'wrong');
+      if (v === correct) o.classList.add('correct');
+      if (v === selected && v !== correct) o.classList.add('wrong');
+    });
+    card.querySelector('.retry').hidden = false;
+    card.querySelectorAll('input').forEach(i => i.disabled = true);
+  }
+})();
+
+/* Dashboard */
+function updateDashboard() {
+  const quizState = getQuizState();
+  const total = document.querySelectorAll('.quiz-card').length;
+  const answered = Object.keys(quizState).length;
+  const correct = Object.values(quizState).filter(s => s.firstCorrect).length;
+  const hl = document.querySelectorAll('#rendered mark[class^="hl-"]').length;
+  const hasCheatsheet = !!document.querySelector('.cheatsheet');
+  const cheatsheetLabel = document.body.classList.contains('cheatsheet-only') ? label('showAllLabel') : label('cheatsheetLabel');
+  const totalSections = document.querySelectorAll('.study-section').length;
+  const assessState = store.get('assess') || {};
+  const ratings = Object.values(assessState).map(s => s.rating).filter(Boolean);
+  const r1 = ratings.filter(r => r === 1).length;
+  const r2 = ratings.filter(r => r === 2).length;
+  const r3 = ratings.filter(r => r === 3).length;
+  const qCount = Object.values(assessState).filter(s => s.question && s.question.trim()).length;
+
+  const dash = document.getElementById('dashboard');
+  const highlighter = `
+    <span class="dash-highlighter" title="${escapeHtml(label('highlighterTitle'))}">
+      <span class="dash-highlighter-label">${escapeHtml(label('highlighterLabel'))}</span>
+      ${HIGHLIGHT_COLORS.map(o =>
+        `<button class="dash-swatch swatch-${o.c} ${activeHighlightColor === o.c ? 'active' : ''}" data-hl-color="${o.c}" aria-label="${escapeHtml(label('highlighterColorTitle', { color: o.c }))}" title="${escapeHtml(label('highlighterColorTitle', { color: o.c }))}">${o.key}</button>`
+      ).join('')}
+    </span>`;
+  dash.innerHTML = `
+    <span class="title-pill">${escapeHtml(document.title)}</span>
+    ${totalSections > 0 ? `<span class="stat" title="${escapeHtml(label('dashboardRatingsTitle'))}">🟢 ${r1} 🟡 ${r2} 🔴 ${r3} <span style="opacity:0.5">/ ${totalSections}</span></span>` : ''}
+    ${qCount > 0 ? `<button id="btn-ask-all" title="${escapeHtml(label('askAllTitle'))}" style="background:var(--ink);color:var(--bg);border-color:var(--ink);">${escapeHtml(label('askAllButton', { count: qCount }))}</button>` : ''}
+    ${total > 0 ? `<span class="stat">${escapeHtml(label('quizStat', { answered, total, correct }))}</span>` : ''}
+    <span class="stat">${escapeHtml(label('highlightsStat', { count: hl }))}</span>
+    ${highlighter}
+    ${hasCheatsheet ? `<button id="btn-cheatsheet">${escapeHtml(cheatsheetLabel)}</button>` : ''}
+    <button id="btn-reset" title="${escapeHtml(label('resetTitle'))}">${escapeHtml(label('resetLabel'))}</button>
+  `;
+  dash.querySelectorAll('.dash-swatch').forEach(btn => {
+    btn.addEventListener('click', () => setActiveHighlightColor(btn.dataset.hlColor));
+  });
+  const btnAsk = document.getElementById('btn-ask-all');
+  if (btnAsk) btnAsk.addEventListener('click', () => {
+    const prompt = window.__collectAllQuestions ? window.__collectAllQuestions() : null;
+    if (!prompt) { showToast(label('noQuestionsToast')); return; }
+    copyText(prompt).then(() => {
+      btnAsk.textContent = `✓ ${label('askAllCopied', { count: qCount })}`;
+      showToast(label('copiedToClipboard'));
+      setTimeout(() => updateDashboard(), 1800);
+    }).catch(() => showToast(label('copyFailedToast')));
+  });
+  const bc = document.getElementById('btn-cheatsheet');
+  if (bc) bc.addEventListener('click', () => { document.body.classList.toggle('cheatsheet-only'); updateDashboard(); });
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    if (confirm(label('resetConfirm'))) { store.clear(); location.reload(); }
+  });
+}
+updateDashboard();
+
+function setActiveHighlightColor(color) {
+  activeHighlightColor = activeHighlightColor === color ? null : color;
+  store.set('highlightColor', activeHighlightColor);
+  updateDashboard();
+  showToast(activeHighlightColor
+    ? label('highlighterOnToast', { color: activeHighlightColor })
+    : label('highlighterOffToast'));
+}
+
+/* Highlight: floating popover + keyboard shortcuts */
+(function initHighlight() {
+  const toolbar = document.getElementById('hl-toolbar');
+  let autoApplyTimer = null;
+  toolbar.innerHTML =
+    `<span class="hint">${escapeHtml(label('highlightHint'))}</span>` +
+    HIGHLIGHT_COLORS.map(o =>
+      `<button class="swatch-${o.c}" data-c="${o.c}" title="${escapeHtml(label('highlightShortcutTitle', { color: o.c, key: o.key }))}">${o.key}</button>`
+    ).join('') +
+    `<button class="swatch-remove" data-c="remove" title="${escapeHtml(label('removeHighlightTitle'))}">0</button>`;
+
+  function activeSelectionInRendered() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.toString().trim()) return null;
+    const range = sel.getRangeAt(0);
+    if (!document.getElementById('rendered').contains(range.commonAncestorContainer)) return null;
+    return { sel, range };
+  }
+  function showToolbarFor(range) {
+    const rect = range.getBoundingClientRect();
+    toolbar.style.left = `${window.scrollX + rect.left + rect.width / 2 - 80}px`;
+    toolbar.style.top = `${window.scrollY + rect.top - 42}px`;
+    toolbar.hidden = false;
+  }
+  function hideToolbar() { toolbar.hidden = true; }
+  function scheduleActiveHighlight(delay = 120) {
+    if (!activeHighlightColor) return;
+    clearTimeout(autoApplyTimer);
+    autoApplyTimer = setTimeout(() => {
+      if (activeHighlightColor && activeSelectionInRendered()) {
+        applyHighlight(activeHighlightColor);
+      }
+    }, delay);
+  }
+
+  function applyHighlight(color) {
+    const r = activeSelectionInRendered();
+    if (!r) return;
+    const range = r.range;
+    const renderRoot = document.getElementById('rendered');
+    if (color === 'remove') {
+      const marks = Array.from(renderRoot.querySelectorAll('mark[class^="hl-"]'));
+      marks.forEach(m => {
+        if (range.intersectsNode(m)) {
+          unwrapNode(m);
+        }
+      });
+    } else {
+      // Walk text nodes inside the range; wrap each segment in its own <mark>.
+      // This preserves block structure (no extractContents → no orphan empty wrappers).
+      const walkRoot = renderRoot.contains(range.commonAncestorContainer)
+        ? range.commonAncestorContainer
+        : renderRoot;
+      const startContainer = range.startContainer;
+      const endContainer = range.endContainer;
+      const startOffset = range.startOffset;
+      const endOffset = range.endOffset;
+
+      const walker = document.createTreeWalker(walkRoot, NodeFilter.SHOW_TEXT, null);
+      const textNodes = [];
+      // Include the start node itself if it's a text node
+      if (startContainer.nodeType === Node.TEXT_NODE) textNodes.push(startContainer);
+      let n;
+      while ((n = walker.nextNode())) {
+        if (!range.intersectsNode(n)) continue;
+        if (n === startContainer) continue;
+        textNodes.push(n);
+      }
+      if (endContainer !== startContainer && endContainer.nodeType === Node.TEXT_NODE && !textNodes.includes(endContainer)) {
+        textNodes.push(endContainer);
+      }
+
+      textNodes.forEach(node => {
+        if (!node.parentNode) return;
+        // skip pure-whitespace text nodes (avoids creating bare-whitespace marks)
+        if (!node.textContent.trim()) return;
+        const existing = node.parentElement && node.parentElement.closest('mark[class^="hl-"]');
+        if (existing) {
+          existing.className = `hl-${color}`;
+          return;
+        }
+        const sub = document.createRange();
+        const so = (node === startContainer) ? startOffset : 0;
+        const eo = (node === endContainer) ? endOffset : node.textContent.length;
+        if (so >= eo) return;
+        sub.setStart(node, so);
+        sub.setEnd(node, eo);
+        try {
+          const m = document.createElement('mark');
+          m.className = `hl-${color}`;
+          sub.surroundContents(m);
+        } catch (e) { /* node already wrapped or non-text content; ignore */ }
+      });
+
+      // Tidy: drop any empty mark/blockquote/p/span left over from prior versions or weird selections.
+      renderRoot.querySelectorAll('mark, blockquote, p, span:not(.title-pill):not(.stat):not(.assess-label):not(.assess-divider):not(.kbd):not(.lang-tag):not(.save-state):not(.hint):not(.rating-dot)').forEach(el => {
+        if (!el.textContent.trim() && el.children.length === 0) el.remove();
+      });
+    }
+    normalizeHighlights(renderRoot);
+    r.sel.removeAllRanges();
+    hideToolbar();
+    saveHighlights();
+  }
+
+  document.addEventListener('mouseup', e => {
+    if (toolbar.contains(e.target)) return;
+    setTimeout(() => {
+      const r = activeSelectionInRendered();
+      if (!r) { hideToolbar(); return; }
+      if (activeHighlightColor) {
+        scheduleActiveHighlight(40);
+        return;
+      }
+      showToolbarFor(r.range);
+    }, 0);
+  });
+  document.addEventListener('selectionchange', () => {
+    const r = activeSelectionInRendered();
+    if (!r) {
+      clearTimeout(autoApplyTimer);
+      hideToolbar();
+      return;
+    }
+    if (activeHighlightColor) scheduleActiveHighlight(180);
+  });
+  toolbar.addEventListener('mousedown', e => e.preventDefault());
+  toolbar.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    applyHighlight(btn.dataset.c);
+  });
+
+  // Keyboard shortcuts: 1/2/3/4 colors, 0 remove. Active only when there's a real text selection inside rendered content.
+  document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const tgt = e.target;
+    if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA' || tgt.isContentEditable)) return;
+    if (!activeSelectionInRendered()) return;
+    const map = { '1': 'yellow', '2': 'pink', '3': 'blue', '4': 'green', '0': 'remove' };
+    const color = map[e.key];
+    if (!color) return;
+    e.preventDefault();
+    applyHighlight(color);
+  });
+
+  // Double-click an existing <mark> to remove it.
+  document.getElementById('rendered').addEventListener('dblclick', e => {
+    const m = e.target.closest('mark');
+    if (m) {
+      while (m.firstChild) m.parentNode.insertBefore(m.firstChild, m);
+      m.remove();
+      saveHighlights();
+      return;
+    }
+    if (activeHighlightColor) {
+      scheduleActiveHighlight(40);
+    }
+  });
+})();
+
+function saveHighlights() {
+  store.set('highlights', { hash: sourceHash, html: document.getElementById('rendered').innerHTML });
+  updateDashboard();
+}
+  </script>
+</body>
+</html>

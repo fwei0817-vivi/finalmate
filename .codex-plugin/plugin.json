@@ -1,0 +1,39 @@
+{
+  "name": "finalmate",
+  "version": "0.1.0",
+  "description": "Generate pyramid-structured study notes, quizzes, and cheatsheets from lecture material.",
+  "author": {
+    "name": "Fengwei",
+    "url": "https://github.com/fwei0817-vivi"
+  },
+  "homepage": "https://github.com/fwei0817-vivi/finalmate#readme",
+  "repository": "https://github.com/fwei0817-vivi/finalmate",
+  "license": "MIT",
+  "keywords": [
+    "study-notes",
+    "exam-prep",
+    "cheatsheets",
+    "interactive-html",
+    "learning-tools",
+    "codex"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "FinalMate",
+    "shortDescription": "Generate study notes and interactive review pages",
+    "longDescription": "Turn course material, source notes, transcripts, and readings into structured study notes, cheatsheets, mock exams, and interactive HTML study pages across disciplines.",
+    "developerName": "Fengwei",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/fwei0817-vivi/finalmate",
+    "defaultPrompt": [
+      "Use $notes to turn these materials into study notes.",
+      "Use $notes to build an interactive review page.",
+      "Use $notes to create a cheatsheet and mock exam."
+    ],
+    "brandColor": "#3F6B5B"
+  }
+}

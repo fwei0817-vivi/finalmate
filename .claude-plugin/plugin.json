@@ -1,0 +1,19 @@
+{
+  "name": "finalmate",
+  "description": "Generate pyramid-structured study notes, quizzes, and cheatsheets from lecture material.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Fengwei"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/fwei0817-vivi/finalmate#readme",
+  "repository": "https://github.com/fwei0817-vivi/finalmate",
+  "keywords": [
+    "study-notes",
+    "exam-prep",
+    "cheatsheets",
+    "interactive-html",
+    "learning-tools",
+    "claude-code"
+  ]
+}
