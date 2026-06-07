@@ -237,14 +237,20 @@ Per-class section:
 Cheatsheet discipline:
 
 - Include 🔥🔥🔥 content; include 🔥🔥 when exam-relevant; omit 🔥 unless it is a crucial connector.
-- Allowed: filled-in templates, formula boxes, worked calculations, procedure tables, diagrams, proof skeletons, owner/action plans, close-reading templates.
+- Allowed: filled-in templates, formula boxes, procedure step lists (①②③④⑤), procedure tables, diagrams, proof skeletons, owner/action plans, close-reading templates.
 - Forbidden: bare concept lists, source quotes, quizzes, long prose, full code listings unless the course is specifically code-based.
-- For quantitative models, include variables, assumptions, objective/formula, constraints/steps, and a checked numeric example.
+- **Abstract procedures > numerical worked examples**. When the user asks for a *printable / final exam* cheatsheet, prefer numbered ①②③④⑤ procedure steps over specific worked numbers — examples belong in the per-lecture notes, not the cheatsheet. Concrete numbers are appropriate only when the procedure is short enough that a tiny example fits inline (e.g., a one-line numeric anchor).
+- **Three-tier visual hierarchy** for multi-page printable cheatsheets: section (`### N · Topic`) → subsection (`#### N.M Sub-topic`) → atomic concept (`**bold inline**`). Flat heading sets read like a wall of text.
+- **Source-language exam terminology**. Even if `outputLang ≠ examLang`, write the cheatsheet in `examLang` (or at minimum keep all formulas, procedure verbs, and strategy labels in the exam language) — the cheatsheet is a recognition tool at exam time. Ask if unsure.
+- **HW-coverage pass before finalizing**. If the project has a `HW/`, `homework/`, or `assignments/` folder, scan it (dispatch an Explore subagent if >5 files). Map each HW to the corresponding cheatsheet section and patch any gap. Topics easily missed from lecture-only review: bounds/inequalities, immunization, NPV/IRR, combination strategies, basis risk, special-payoff closed forms, full Greek tables.
+- For quantitative models, include variables, assumptions, objective/formula, constraints/steps; show one tiny numeric anchor only if it clarifies the procedure.
 - For case/application topics, include scenario, diagnosis, action, owner, and adaptation rule.
 
 After all class notes, produce `cheatsheet.<ext>` by concatenating per-class cheatsheets in order. In Mode B, use the same `template.html` shell.
 
 If `cheatsheet.pages > 0`, estimate page length. If over budget, surface trim suggestions ordered from low-priority to high-priority. Never auto-trim without the user's approval.
+
+For *printable PDF* cheatsheets (multi-column, Letter/A4, `@page` rules), see `references/cheatsheet_pdf.md` — covers the pandoc → KaTeX → Chrome-headless pipeline, a drop-in build script, a tuned three-tier CSS template, page-fill heuristics, and a verification loop.
 
 ## Step 7 — Solutions and Mock Exams
 
@@ -271,6 +277,8 @@ Completion message: 2-3 concise sentences naming created files and the useful le
 Load only when needed:
 
 - `references/templates.md` — detailed section, solutions, mock exam, and cheatsheet templates
+- `references/cheatsheet_pdf.md` — printable multi-column PDF pipeline (pandoc → KaTeX → Chrome headless), tuned three-tier CSS, page-fill heuristics
+- `assets/build_cheatsheet_pdf.py` — drop-in build script for the PDF pipeline; copy into `<project>/code/` and run with `--pages`, `--columns`, `--font-size` to tune
 - `template.html` — Mode B HTML shell
 - `examples/class_demo.md` — Markdown demo source
 - `examples/class_demo.html` — rendered HTML demo
